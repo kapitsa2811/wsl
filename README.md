@@ -1,5 +1,5 @@
 
-# Weakly Supervised Text Detector
+# Weakly Supervised 
 
 <img src="sample.png" height="300">
 
