@@ -744,6 +744,7 @@ class TextDetectorTrainer:
 
         self.imageNameList = os.listdir(self.hitImagesPath)
         self.imagesList = []
+        self.imagesListPath = []
         self.readImageCount=50
 
         for indx, img in enumerate(self.imageNameList):
@@ -754,6 +755,7 @@ class TextDetectorTrainer:
             #tempImage = cv2.imread(self.location + img)
 
             tempImage=Image.open(self.hitImagesPath +"//"+ img)
+            self.imagesListPath.append(self.hitImagesPath +"//"+ img)
 
             # print "\n\t tempImage shape= ",tempImage.shape
             #gray=rgb
