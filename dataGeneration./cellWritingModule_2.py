@@ -197,7 +197,7 @@ class TextDetectorTrainer:
             t=read_dictionary[imageName]
             #allComponents=os.listdir(readImage+folderName)
             #print("\n\t\t t=",t)
-
+            #imageName=imageName.split("table\\")[1] # only in case of window unable this
             try:
                 dummyImageName=imageName.split(".jpg")[0]+"_dummy_"+".jpg"
                 print("\n\t dummyImageName=",dummyImageName,"\t\t is present=",os.path.isfile(tableRead+ "//" +dummyImageName))
