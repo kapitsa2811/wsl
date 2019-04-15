@@ -765,7 +765,7 @@ class TextDetectorTrainer:
 
             #tempImage = cv2.resize(tempImage, (15, 15))
             #cv2.imwrite("/home/kapitsa/Documents/Dataset/crop/hitImages_resize//" + img, tempImage)
-
+            tempImage.close()
         #return imagesList
 
 
