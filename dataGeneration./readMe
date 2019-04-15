@@ -1,6 +1,7 @@
 
 3. Create a folder structure publicationData--> 8 (expNo) -->table
                                                           -->tableRelatedAll
+                                                          -->textTables
                                                           -->train
                                                                   --->imageWord
                                                                   --->segWord
