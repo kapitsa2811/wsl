@@ -781,7 +781,11 @@ class TextDetectorTrainer:
         '''
         imgNo=self.randTabIndx #nm#%len(self.imagesList)
         inserImage = self.imagesList[imgNo]
-
+        
+        '''
+            important change
+        '''
+        inserImage =Image.open(self.imagesListPath[imgNo])
 
         _,self.tempCanvas,self.hh_=self.genNoEasyEdges1(inserImage)
 
