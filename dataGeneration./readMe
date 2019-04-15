@@ -1,1 +1,14 @@
-run randomTablesPaper_2.py
+
+3. Create a folder structure publicationData--> 8 (expNo) -->table
+                                                          -->tableRelatedAll
+                                                          -->train
+                                                                  --->imageWord
+                                                                  --->segWord
+
+here 8 is experiment no, if your experiment no is say 10 then make corresponding changes in all code files to variable expNo and
+create that folder.
+
+run randomTablesPaper_2.py : to generate tables
+2. To extract cells from tables generate by randomTablesPaper_2.py run cellExtractionModule_2.py 
+
+3.cellWritingModule_2.py: writes content inside table cells
