@@ -32,8 +32,8 @@ from lxml.html import *
 pwd=os.getcwd()+"\\"
 #print "\n\t pwd="
 
-hocrPaths="/home/wipro/PycharmProjects/hocr/fileconverter_batch/pdf/ProjectReport//"
-imagePath="/home/wipro/PycharmProjects/hocr/fileconverter_batch/pdf/images//"
+hocrPaths="/home//PycharmProjects/hocr/fileconverter_batch/pdf/ProjectReport//"
+imagePath="/home/PycharmProjects/hocr/fileconverter_batch/pdf/images//"
 imageNames=os.listdir(imagePath)
 print ("\n\t imageNames=",imageNames)
 
@@ -61,7 +61,7 @@ for indx,imageName in enumerate(imageNames):
 
     print("\n\t out1=",out1)
 
-    tempPath="/home/wipro/PycharmProjects/hocr/fileconverter_batch/pdf//"
+    tempPath="/home//PycharmProjects/hocr/fileconverter_batch/pdf//"
     print("\n\t imagePath+out1",tempPath+out1)
 
 
