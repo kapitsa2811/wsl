@@ -7,24 +7,24 @@
 import os
 import pandas as pd
 import cv2
-
-csvpath="/home/wipro/PycharmProjects/hocr/fileconverter_batch/pdf//out.csv"
+cwd=os.getcwd()+"//"
+csvpath=cwd+"//csv//out.csv"
 
 
 df=pd.read_csv(csvpath)
 
-#print("\n\t df=",df.head())
+print("\n\t df=",df.head())
 
 fileName1="ProjectReport_page12.png"
-image = cv2.imread("/home/wipro/PycharmProjects/hocr/fileconverter_batch/pdf/images//"+fileName1)
-image1 = cv2.imread("/home/wipro/PycharmProjects/hocr/fileconverter_batch/pdf/images//"+fileName1)
+image = cv2.imread(cwd+"//image//"+fileName1)
+image1 = cv2.imread(cwd+"/image//"+fileName1)
 #print("\n\t shape=",image.shape)
 
 df1=df[df["fileName"]==fileName1]
 print("\n\t df1=",df1.shape)
 
 #print("\n\t df1.head()=",df1.head())
-print("\n\t df1.columns()=",df1.columns)
+#print("\n\t df1.columns()=",df1.columns)
 
 yStart=0
 yDict={}
@@ -34,45 +34,13 @@ yLoc2=df1.columns.get_loc("y2")
 
 print("",yLoc1,"\t ",yLoc2)
 
-import numpy as np
-
-
-def getNearestPoints(l,d,image1):
-
-    sortCord=[]
-
-    if len(l)>=1:
-        #sortCord.append(l[0])
-        print("\n\t l[0]=",l[0])
-        dd = d[l[0]][0]
-        tempX1, tempY1 = int(dd[0]), int(dd[1])
-        tempX2, tempY2 = int(dd[2]), int(dd[3])
-        print("\n\t 1.tempX1, tempY1 =",tempX1, tempY1 )
-        print("\n\t 1.tempX1, tempY1 =",tempX2, tempY2 )
-
-        sortCord.append([tempX1, tempY1,tempX2, tempY2])
-
-    if len(l)>=2:
-        #sortCord.append(l[1])
-        dd = d[l[1]][0]
-        tempX1, tempY1 = int(dd[0]), int(dd[1])
-        tempX2, tempY2 = int(dd[2]), int(dd[3])
-
-        print("\n\t 2.tempX1, tempY1 =",tempX1, tempY1 )
-        print("\n\t 2.tempX1, tempY1 =",tempX2, tempY2 )
-
-        sortCord.append([tempX1, tempY1,tempX2, tempY2])
-
-    return sortCord
-
-
 def lineSegmentation(df1):
 
     lineSegment={}
     print("\n\t this segments line")
     threshold=25
-    image = cv2.imread("/home/wipro/PycharmProjects/hocr/fileconverter_batch/pdf/images//" + fileName1)
-    image1 = cv2.imread("/home/wipro/PycharmProjects/hocr/fileconverter_batch/pdf/images//" + fileName1)
+    image = cv2.imread(cwd+"//image//" + fileName1)
+    image1 = cv2.imread(cwd+"//image//" + fileName1)
     lastX,lastY=None,None
     lastX2,lastY2=None,None
     startX,startY=None,None
@@ -114,6 +82,9 @@ def lineSegmentation(df1):
 
         lastWord,nextWord="",""
 
+        '''
+            gathers last line neccessary features
+        '''
         for indx1,val1 in enumerate(wordCorLine[curtLineNo-1]):
 
             byWord=wordLine[curtLineNo-1][indx1]
@@ -167,9 +138,9 @@ def lineSegmentation(df1):
 
                 # cv2.imshow(str(forWord)+"_"+str(byWord)+"_"+str(nextWord)+"_"+str(prevWord), ims)
                 # cv2.moveWindow(str(forWord)+"_"+str(byWord)+"_"+str(nextWord)+"_"+str(prevWord), 100, 100)
-                # cv2.waitKey()
-                overlapFlag=0
-                #cv2.destroyAllWindows()
+                # cv2.waitKey(2)
+                # overlapFlag=0
+                # cv2.destroyAllWindows()
 
                 '''
                     above word coordinate
@@ -212,11 +183,9 @@ def lineSegmentation(df1):
                     cor.loc[wordFeatureIndx, "1"] = [xTempR1, yTempR1, xTempR2, yTempR2]
                     cor1.loc[wordFeatureIndx, "1"] = nextWord
 
-                #del image1
-                #input("check")
-
-
-        #################
+        '''
+            next line features
+        '''
 
         for indx1,val1 in enumerate(wordCorLine[curtLineNo+1]):
 
@@ -229,14 +198,13 @@ def lineSegmentation(df1):
             '''
             cor.loc[wordFeatureIndx, "4"] =[xTemp1,yTemp1,xTemp2,yTemp2]
 
-
             print("\n\t 00.wordCorLine::>",len(wordCorLine[curtLineNo + 1]))
             print("\n\t 11.wordCorLine::>",len(wordCorLine[curtLineNo + 1][indx1-1]))
             print("\n\t 22.wordCorLine:",len(wordCorLine[curtLineNo + 1][indx1]))
 
-
-            if yTemp1 >=y1 or yTemp1 >=y2 or yTemp2 >=y1 or yTemp2 >=y2 :
-                break
+            #
+            # if yTemp1 >=y1 or yTemp1 >=y2 or yTemp2 >=y1 or yTemp2 >=y2 :
+            #     break
 
             # print("\n\t rule 1:",xTemp1<=x2 and xTemp2>x2)
             # print("\n\t rule 2:",xTemp2>=x1 and xTemp1<=x1)
@@ -306,7 +274,7 @@ def lineSegmentation(df1):
                     cor1.loc[wordFeatureIndx, "3"] = nextWord
 
         #return image
-        return cor,cor1,wordFeatureIndx
+        return cor,cor1,wordFeatureIndx,image11
 
 
     for rowNo, row in df1.iterrows():
@@ -347,22 +315,6 @@ def lineSegmentation(df1):
             tempWordCord=[]
             tempWordCord.append([cuX,cuY,cuX2,cuY2])
             lineSegment[lineCount]=[startX, startY,lastX2,lastY2]
-            #cv2.line(image, (startX,startY), (xTemp2, yTemp2), (0, 0, 255), 3)
-            #df = cellPushCordinate(df, rowNo, cuX, cuY, cuX2, cuY2,lineCount)
-            wTemp=w.split("_")[-1][0]
-
-            # getWords(image,lineCount, currentCor,countWords,wordCorLine)
-
-            # try:
-            #
-            #     crop = image[startY:cuY2, startX:lastX]
-            #     #crop = image[startX:cuX2,startY:cuY2] #cuX2,cuY2
-            #     #print("\n\t crop=", crop.shape)
-            #     #cv2.imshow("crop",crop)
-            #     #cv2.imwrite("/home/wipro/PycharmProjects/hocr/fileconverter_batch/pdf//delMe//"+str(lineCount)+".jpg",crop)
-            #
-            # except Exception as e:
-            #     pass
 
             '''
                 entire row line segment
@@ -371,7 +323,8 @@ def lineSegmentation(df1):
 
             countWords=0
 
-            winname = w+"_"+str(abs(cuY - lastY))
+            print("\n\t cuY=",cuY,"\t lastY=",lastY)
+            winname = str(w)+"_"+str(int(abs(cuY - lastY)))
 
             '''
                 puts all words in last line to dictionary
@@ -385,12 +338,12 @@ def lineSegmentation(df1):
             # print("\n\t words=",winname)
             # print("\n\t wTemp=",wTemp)
             #
-            # print("\n\t all word in dict=",wordLine[lineCount])
+            # print("\n\t all word 0in dict=",wordLine[lineCount])
 
-            cv2.namedWindow(winname)
-            cv2.moveWindow(winname, 40, 30)
-            ims = cv2.resize(image, (940, 940))
-            cv2.imshow(winname, ims)
+            # cv2.namedWindow(winname)
+            # cv2.moveWindow(winname, 40, 30)
+            # ims = cv2.resize(image, (940, 940))
+            # cv2.imshow(winname, ims)
             #cv2.waitKey()
             #cv2.destroyWindow(winname)
 
@@ -443,20 +396,35 @@ def lineSegmentation(df1):
                 image11 = image
 
                 try:
-                    cor,cor1,wordFeatureIndx=getWords(image11, curtLineNo, currentCor1, countWords, wordCorLine,wordIndx,wordLine,cor,cor1,wordFeatureIndx)
+                    cuLinePrev,cuLineNext="",""
+
+                    if wordIndx>0:
+                        cuLinePrev=wordCorLine[curtLineNo][wordIndx-1]
+                        print("\n\t cuLinePrev=",cuLinePrev)
+                        cor.loc[wordFeatureIndx, "6"] = cuLinePrev
+                        #print("\n\t cuLineNext =",cuLineNext)
+
+
+                    if (wordIndx+1)<(len(wordCorLine[curtLineNo])):
+
+                        cuLineNext =wordCorLine[curtLineNo][wordIndx+1]
+                        cor.loc[wordFeatureIndx, "2"] = cuLineNext
+                        print("\n\t cuLineNext =",cuLineNext)
+
+                    cor,cor1,wordFeatureIndx,image11=getWords(image11, curtLineNo, currentCor1, countWords, wordCorLine,wordIndx,wordLine,cor,cor1,wordFeatureIndx)
                     wordFeatureIndx+=1
                     del image11
                 except Exception as e:
                     print("\n\ exception")
-                    input("exception")
+                    #input("exception")
                     pass
 
 
                 #input("check")
 
-    cor.to_csv("/home/wipro/PycharmProjects/hocr/fileconverter_batch//feature.csv")
-    cor1.to_csv("/home/wipro/PycharmProjects/hocr/fileconverter_batch//feature1.csv")
-    print("\n\t *******************************************************")
+    cor.to_csv(cwd+"//csv//feature.csv")
+    cor1.to_csv(cwd+"//csv//feature1.csv")
+    cv2.imwrite(cwd+"//featureImage//"+fileName1+".png",image11)
 lineSegmentation(df1)
 
 
