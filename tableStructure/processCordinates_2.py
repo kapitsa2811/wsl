@@ -3,7 +3,7 @@
 '''
 
 
-
+import copy
 import os
 import pandas as pd
 import cv2
@@ -15,13 +15,14 @@ df=pd.read_csv(csvpath)
 
 print("\n\t df=",df.head())
 
-fileName1="ProjectReport_page12.png"
-image = cv2.imread(cwd+"//image//"+fileName1)
-image1 = cv2.imread(cwd+"/image//"+fileName1)
-#print("\n\t shape=",image.shape)
-
-df1=df[df["fileName"]==fileName1]
-print("\n\t df1=",df1.shape)
+#
+# fileName1="1_slastNormalCanvas.jpg"
+# image = cv2.imread(cwd+"//image//"+fileName1)
+# image1 = cv2.imread(cwd+"/image//"+fileName1)
+# print("\n\t shape=",image.shape)
+#
+# df1=df[df["fileName"]==fileName1]
+# print("\n\t df1=",df1.shape)
 
 #print("\n\t df1.head()=",df1.head())
 #print("\n\t df1.columns()=",df1.columns)
@@ -29,12 +30,25 @@ print("\n\t df1=",df1.shape)
 yStart=0
 yDict={}
 
-yLoc1=df1.columns.get_loc("y1")
-yLoc2=df1.columns.get_loc("y2")
+# yLoc1=df1.columns.get_loc("y1")
+# yLoc2=df1.columns.get_loc("y2")
+#
+# print("",yLoc1,"\t ",yLoc2)
 
-print("",yLoc1,"\t ",yLoc2)
 
-def lineSegmentation(df1):
+def plot(image,name):
+    ims = cv2.resize(image, (700, 700))
+
+    # print("\n\t forWOrd-",str(forWord),"\t byWord-",str(byWord))
+
+    cv2.imshow(name, ims)
+    cv2.moveWindow(name, 300, 300)
+    cv2.waitKey()
+    # overlapFlag=0
+    cv2.destroyAllWindows()
+
+
+def lineSegmentation(df1,fileName1):
 
     lineSegment={}
     print("\n\t this segments line")
@@ -52,14 +66,31 @@ def lineSegmentation(df1):
     wordCorLine={} # this store line lever word cordinate information
     wordLine={}
 
-    df=pd.DataFrame(columns=["fileName","x1","y1","x11","y11","lineNo"])
+    df=pd.DataFrame(columns=["fileName","x1","y1","x11","y11","lineNo","table"])
 
 
     def getWords(image11,curtLineNo,currentCor,countWords,wordCorLine,wordIndx,wordLine,cor,cor1,wordFeatureIndx):
-        #print("\n\t\t this gives near words")
+        print("\n\t\t this gives near words")
 
         x1,x2=currentCor[0],currentCor[2]
         y1,y2=currentCor[1],currentCor[3]
+
+        '''
+            table coordinate from original file
+        '''
+        annot1 = annot[annot["fileName"] == fileName]
+        hello = annot1["x1"][0]
+        print("\n\t annot1:\n\t",[annot1["x1"],annot1["y1"],annot1["x2"],annot1["y2"]])
+        input("check")
+        t=tableInsert(cor,currentCor,annot1,wordFeatureIndx)
+
+        if t > 0:
+            cor.loc[wordFeatureIndx, "table"] = 1
+        else:
+            cor.loc[wordFeatureIndx, "table"] = 0
+
+        print("\n\t t=", t)
+        input("t")
 
         overlapFlag=0
         forWord=wordLine[curtLineNo][wordIndx]
@@ -70,6 +101,8 @@ def lineSegmentation(df1):
         '''
         cor.loc[wordFeatureIndx,"0"]=[x1,y1,x2,y2]
         cor1.loc[wordFeatureIndx,"0"]=forWord
+        #cor.loc[wordFeatureIndx,"table"]=1
+
         print("\n\t\t 2.current word coordinate:",currentCor)
         print("\n\t\t 2.current word:",wordLine[curtLineNo][wordIndx])
         print("\n\t\t 2.current line no:",curtLineNo)
@@ -85,8 +118,11 @@ def lineSegmentation(df1):
         '''
             gathers last line neccessary features
         '''
+
         for indx1,val1 in enumerate(wordCorLine[curtLineNo-1]):
 
+            print("***********************************************************")
+            image3=copy.deepcopy(image11)
             byWord=wordLine[curtLineNo-1][indx1]
             nextWord, prevWord = "", ""
             #print("\n\t val1=",val1)
@@ -127,24 +163,24 @@ def lineSegmentation(df1):
                 # print("\n\t 2.word x1:",x1,"\t 2.x2:",x2)
                 # print("\n\t 2.overlap word xTemp1:",xTemp1,"\t 2.xTemp2:",xTemp2)
                 # print("\n\t 2.flag=",overlapFlag)
-                cv2.rectangle(image11,(xTemp2, yTemp2), (xTemp1, yTemp1),(0, 255, 0), 5)
-                cv2.rectangle(image11,(x1, y1), (x2, y2),(255,0, 0), 5)
-                cv2.line(image1,(x1,y1),(x2,y2), (0, 0, 255), 3)
-                cv2.line(image11,(xTemp2,yTemp2),(xTemp1,yTemp1), (0, 0, 255), 3)
-                cv2.line(image11,(x1,y1),(xTemp2,yTemp2), (0, 255,0), 5)
-                ims=cv2.resize(image11,(700,700))
-
+                cv2.rectangle(image3,(xTemp2, yTemp2), (xTemp1, yTemp1),(0, 255, 0), 5)
+                cv2.rectangle(image3,(x1, y1), (x2, y2),(255,0, 0), 5)
+                #cv2.line(image1,(x1,y1),(x2,y2), (0, 0, 255), 3)
+                #cv2.line(image3,(xTemp2,yTemp2),(xTemp1,yTemp1), (0, 0, 255), 3)
+                cv2.line(image3,(x1,y1),(xTemp2,yTemp2), (0, 255,0), 5)
+                ims=cv2.resize(image3,(700,700))
+                overlapFlag=0
                 #print("\n\t forWOrd-",str(forWord),"\t byWord-",str(byWord))
+                name=str(forWord)+"_"+str(byWord)+"_"+str(nextWord)+"_"+str(prevWord)
 
-                # cv2.imshow(str(forWord)+"_"+str(byWord)+"_"+str(nextWord)+"_"+str(prevWord), ims)
-                # cv2.moveWindow(str(forWord)+"_"+str(byWord)+"_"+str(nextWord)+"_"+str(prevWord), 100, 100)
-                # cv2.waitKey(2)
-                # overlapFlag=0
-                # cv2.destroyAllWindows()
+                # cv2.imshow(name, ims)
+                # cv2.moveWindow(name, 100, 100)
+                #plot(image3,name)
 
                 '''
                     above word coordinate
                 '''
+
                 cor.loc[wordFeatureIndx, "8"] = [xTemp1, yTemp1, xTemp2, yTemp2]
                 cor1.loc[wordFeatureIndx, "8"] = byWord
 
@@ -183,6 +219,7 @@ def lineSegmentation(df1):
                     cor.loc[wordFeatureIndx, "1"] = [xTempR1, yTempR1, xTempR2, yTempR2]
                     cor1.loc[wordFeatureIndx, "1"] = nextWord
 
+        #plot(image11, name)
         '''
             next line features
         '''
@@ -230,18 +267,19 @@ def lineSegmentation(df1):
             if overlapFlag > 0:
                 # print("\n\t 2.word x1:",x1,"\t 2.x2:",x2)
                 # print("\n\t 2.overlap word xTemp1:",xTemp1,"\t 2.xTemp2:",xTemp2)
-                # print("\n\t 2.flag=",overlapFlag)
-                cv2.rectangle(image11, (xTemp2, yTemp2), (xTemp1, yTemp1), (0, 255, 0), 5)
-                cv2.rectangle(image11, (x1, y1), (x2, y2), (255, 0, 0), 5)
-                cv2.line(image1, (x1, y1), (x2, y2), (0, 0, 255), 3)
-                cv2.line(image11, (xTemp2, yTemp2), (xTemp1, yTemp1), (0, 0, 255), 3)
-                cv2.line(image11, (x1, y1), (xTemp2, yTemp2), (0, 255, 0), 5)
-                ims = cv2.resize(image11, (700, 700))
+                print("\n\t 2.flag=",overlapFlag)
+                #cv2.rectangle(image3, (xTemp2, yTemp2), (xTemp1, yTemp1), (0, 255, 0), 5)
+                cv2.rectangle(image3, (x1, y1), (x2, y2), (255, 0, 0), 5)
+                #cv2.line(image3, (x1, y1), (x2, y2), (0, 0, 255), 3)
+                #cv2.line(image3, (xTemp2, yTemp2), (xTemp1, yTemp1), (0, 0, 255), 3)
+                cv2.line(image3, (x1, y1), (xTemp2, yTemp2), (255, 255, 0), 5)
+                #ims = cv2.resize(image3, (700, 700))
 
                 # print("\n\t forWOrd-",str(forWord),"\t byWord-",str(byWord))
                 # cv2.imshow(str(forWord) + "_" + str(byWord) + "_" + str(nextWord) + "_" + str(prevWord), ims)
                 # cv2.moveWindow(str(forWord) + "_" + str(byWord) + "_" + str(nextWord) + "_" + str(prevWord), 100, 100)
                 # cv2.waitKey()
+                #plot(image3,name)
                 overlapFlag = 0
                 #cv2.destroyAllWindows()
 
@@ -277,6 +315,7 @@ def lineSegmentation(df1):
         return cor,cor1,wordFeatureIndx,image11
 
 
+
     for rowNo, row in df1.iterrows():
 
         #print("\n\t rowNo:",rowNo)
@@ -289,6 +328,8 @@ def lineSegmentation(df1):
         cuX2,cuY2= int(df1.loc[rowNo, 'x2']), int(df1.loc[rowNo,'y2'])
         midX,midY=(cuX+cuX2)/2,(cuY+cuY2)/2 ## current cell mid coordinate
         currentCor=[cuX,cuY,cuX2,cuY2]
+
+
         w = df1.loc[rowNo, "word_1"]
 
         #print("\n\t cuX:",cuX,"\t cuY:",cuY)
@@ -374,8 +415,9 @@ def lineSegmentation(df1):
 
     print("\n\t ###################################################")
 
-    cor=pd.DataFrame(columns=["word","0","1","2","3","4","5","6","7","8"])
-    cor1=pd.DataFrame(columns=["word","0","1","2","3","4","5","6","7","8"])
+
+    cor=pd.DataFrame(columns=["word","0","1","2","3","4","5","6","7","8","table"])
+    cor1=pd.DataFrame(columns=["word","0","1","2","3","4","5","6","7","8","table"])
     wordFeatureIndx=0
 
     totKeys=len(wordCorLine.keys())
@@ -396,6 +438,7 @@ def lineSegmentation(df1):
                 image11 = image
 
                 try:
+
                     cuLinePrev,cuLineNext="",""
 
                     if wordIndx>0:
@@ -411,7 +454,10 @@ def lineSegmentation(df1):
                         cor.loc[wordFeatureIndx, "2"] = cuLineNext
                         print("\n\t cuLineNext =",cuLineNext)
 
-                    cor,cor1,wordFeatureIndx,image11=getWords(image11, curtLineNo, currentCor1, countWords, wordCorLine,wordIndx,wordLine,cor,cor1,wordFeatureIndx)
+                    initialize(cor, cor1, wordFeatureIndx)
+
+                    cor,cor1,wordFeatureIndx,image111=getWords(image11, curtLineNo, currentCor1, countWords, wordCorLine,wordIndx,wordLine,cor,cor1,wordFeatureIndx)
+                    #plot(image111,str(wordFeatureIndx))
                     wordFeatureIndx+=1
                     del image11
                 except Exception as e:
@@ -424,8 +470,71 @@ def lineSegmentation(df1):
 
     cor.to_csv(cwd+"//csv//feature.csv")
     cor1.to_csv(cwd+"//csv//feature1.csv")
-    cv2.imwrite(cwd+"//featureImage//"+fileName1+".png",image11)
-lineSegmentation(df1)
+    #cv2.imwrite(cwd+"//featureImage//"+fileName1+".png",image11)
+
+
+
+def initialize(cor,cor1,curtLineNo):
+    cor.loc[curtLineNo, "0"] = [0, 0, 0, 0]
+    cor.loc[curtLineNo, "1"] = [0, 0, 0, 0]
+    cor.loc[curtLineNo, "2"] = [0, 0, 0, 0]
+    cor.loc[curtLineNo, "3"] = [0, 0, 0, 0]
+
+    cor.loc[curtLineNo, "4"] = [0, 0, 0, 0]
+    cor.loc[curtLineNo, "5"] = [0, 0, 0, 0]
+    cor.loc[curtLineNo, "6"] = [0, 0, 0, 0]
+    cor.loc[curtLineNo, "7"] = [0, 0, 0, 0]
+    cor.loc[curtLineNo, "8"] = [0, 0, 0, 0]
+
+    return cor,cor1
+
+
+def tableInsert(cor,currentCor,annot1,wordFeatureIndx):
+
+    print("inside 1")
+
+    from shapely.geometry import Polygon
+    print("inside 2")
+    x1, x2 = currentCor[0], currentCor[2]
+    y1, y2 = currentCor[1], currentCor[3]
+    print("inside 3")
+    oriX, oriY, oriX1, oriY1 = annot1["x1"], annot1["y1"], annot1["x2"], annot1["y2"]
+
+
+    print("\n\t co-ordinates:",oriX, oriY, oriX1, oriY1 )
+    print("\n\t x1=",x1)
+
+
+    a = Polygon([(oriX, oriY), (oriX1, oriY), (oriX1, oriY1), (oriX, oriY1)])
+    b = Polygon([(x1, y1), (x2, y1), (x2, y2), (x1, y1)])
+
+    t = a.intersection(b).area / a.union(b).area
+
+    return t
+
+imagePath=cwd+"//image//"
+
+
+annotateFilePath="/home/wipro/PycharmProjects/wsl/wsl-master/publicationData/9/tableRelatedAll/delMe//train.csv"
+
+annot=pd.read_csv(annotateFilePath)
+
+
+'''
+    for all files present in folder
+'''
+
+for fileIndx,fileName in enumerate(os.listdir(imagePath)):
+
+    print("\n\t imagePath=",imagePath)
+    print("\n\t is file:",os.path.isfile(imagePath+fileName))
+    print("\n\t fileIndx:",fileIndx,"\t fileName:",fileName)
+    df1 = df[df["fileName"] == fileName]
+
+
+    #print("\n\t df1 =",df1)
+    #cor.loc[rowNo, "0"]
+    lineSegmentation(df1,fileName)
 
 
 
